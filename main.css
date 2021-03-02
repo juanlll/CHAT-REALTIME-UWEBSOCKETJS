@@ -1,0 +1,58 @@
+html,
+body {
+    height: 100%;
+    font-family: "SF UI Text", "San Francisco Text", Roboto, -apple-system, sans-serif;
+}
+
+#chat {
+    height: 80%;
+    overflow: hidden;
+    display: flex;
+    flex-flow: column;
+}
+
+#messages-window {
+    background: #eee;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: auto;
+    align-items: flex-start;
+    padding: 20px;
+}
+
+.message {
+    background: gray;
+    color: white;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 16px;
+    max-width: 70%;
+}
+
+.ours {
+    background: #0076ff;
+    align-self: flex-end;
+}
+
+input {
+    padding: 10px;
+}
+
+.avatar {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 41px;
+    background: green;
+    font-family: Arial;
+    font-weight: 500;
+    color: #fff;
+}
+
+div>span {
+    margin: 10px;
+}

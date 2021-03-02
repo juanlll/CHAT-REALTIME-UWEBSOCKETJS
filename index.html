@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>WEBCHAT - REALTIME</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+</head>
+
+<body>
+    <h1>Chat en Tiempo real</h1>
+    <div id="chat">
+        <div v-if="user.nickname === null">
+            <label>Agrega El nickname:</label>
+            <input type="text" v-model="nickname" v-on:keyup.enter="addUser(nickname)" />
+        </div>
+        <hr>
+        <p id="examples" v-if="user.nickname !== null">
+            <span v-for="user in users" id="example-avatar" class="avatar" style="text-transform: uppercase;" :style="{ 'background-color': user.color }">{{user.nickname.substr(0,2)}}</span> <span id="example-email"></span>
+        </p>
+        <hr>
+        <div id="messages-window" v-if="user.nickname !== null">
+            <span v-for="message in messages">
+                <span id="example-avatar" class="avatar" style="text-transform: uppercase;" :style="{ 'background-color': message.user.color }">{{message.user.nickname.substr(0,2)}}</span>
+            <span v-bind:class="'message ' + (message.user.uuid==1 ? 'ours' : 'theirs')" :style="{'background-color': message.user.color}">{{message.content}}</span>
+            </span>
+        </div>
+        <input type="text" v-model="newMessageContent" v-on:keyup.enter="addMessage" v-if="user.nickname !== null" />
+    </div>
+</body>
+<script>
+    const app = new Vue({
+        el: '#chat',
+        created: function() {
+            this.ws = new WebSocket('ws://localhost:5000/');
+
+            this.ws.onopen = () => {};
+
+            this.ws.onmessage = (message) => {
+                if (typeof message.data !== 'undefined') {
+
+                    let json = JSON.parse(message.data);
+
+                    switch (json.action) {
+                        case 'REFRESH_USERS_TO_CLIENTS':
+                            this.users = json.data.users;
+                            break;
+                        case 'REFRESH_MESSAGES_TO_CLIENTS':
+                            this.messages = json.data.messages;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        },
+        data: {
+            ws: null,
+            nickname: null,
+            newMessageContent: '',
+            user: {
+                uuid: null,
+                nickname: null,
+                color: null
+            },
+            users: [],
+            messages: []
+        },
+        methods: {
+            addMessage: function() {
+                this.ws.send(JSON.stringify({
+                    action: 'ADD_MESSAGE',
+                    data: {
+                        message: {
+                            user: this.user,
+                            content: this.newMessageContent
+                        }
+                    }
+                }));
+                this.newMessageContent = '';
+            },
+            addUser(nickname) {
+                if (nickname !== null) {
+                    let json = {
+                        action: 'ADD_USER',
+                        data: {
+                            user: {
+                                color: this.getRandomColor(),
+                                nickname: nickname,
+                                uuid: this.generateUuid()
+                            }
+                        }
+                    };
+                    this.ws.send(JSON.stringify(json));
+                    this.user = json.data.user;
+                }
+            },
+            leaveUser(uuid) {
+                this.users = this.users.filter((u) => u.uuid !== uuid);
+            },
+            generateUuid() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    let r = Math.random() * 16 | 0,
+                        v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            },
+            getRandomColor() {
+                return "#" + (Math.random() * 0xFFFFFF << 0).toString(16);
+            },
+            isEmptyUser(user) {
+                return typeof user.id !== 'undefined' &&
+                    user.id !== null &&
+                    typeof user.color !== 'undefined' &&
+                    user.color !== null &&
+                    typeof user.nickname !== 'undefined' &&
+                    user.nickname !== null;
+            }
+        }
+    })
+</script>
+
+</html>

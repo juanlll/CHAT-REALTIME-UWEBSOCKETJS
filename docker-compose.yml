@@ -1,0 +1,17 @@
+version: '3'
+services:
+  websocket:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    volumes:
+      - "./:/usr/src/app"
+      - "reserved:/usr/src/app/node_modules"
+  mongo:
+    image: "mongo" 
+    ports:
+      - "27017:27017"
+volumes:
+  reserved:
