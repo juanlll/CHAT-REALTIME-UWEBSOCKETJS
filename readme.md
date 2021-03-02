@@ -24,7 +24,7 @@ docker-compose up -d
 ```
 El Servicio de websocket queda levantado en el puerto 5000 y El Index.html lo puede abrir desde el navegador sin ningun servidor.
 ```sh
-127.0.0.1:8000
+127.0.0.1:5000
 ```
 
 ## License
